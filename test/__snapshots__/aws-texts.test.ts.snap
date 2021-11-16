@@ -1,0 +1,483 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Snapshot 1`] = `
+Object {
+  "Outputs": Object {
+    "TextApiGatewayEndpoint1B713D84": Object {
+      "Value": Object {
+        "Fn::Join": Array [
+          "",
+          Array [
+            "https://",
+            Object {
+              "Ref": "TextApiGateway437DBC5F",
+            },
+            ".execute-api.",
+            Object {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            Object {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            Object {
+              "Ref": "TextApiGatewayDeploymentStagedev47E27826",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": Object {
+    "AssetParametersc4ac8c6ff13630fec25b949ce93c9ed55cdfbc7bb7eae6c4f3236066d47e0dc5ArtifactHash1D4D9E1B": Object {
+      "Description": "Artifact hash for asset \\"c4ac8c6ff13630fec25b949ce93c9ed55cdfbc7bb7eae6c4f3236066d47e0dc5\\"",
+      "Type": "String",
+    },
+    "AssetParametersc4ac8c6ff13630fec25b949ce93c9ed55cdfbc7bb7eae6c4f3236066d47e0dc5S3Bucket4255F1C3": Object {
+      "Description": "S3 bucket for asset \\"c4ac8c6ff13630fec25b949ce93c9ed55cdfbc7bb7eae6c4f3236066d47e0dc5\\"",
+      "Type": "String",
+    },
+    "AssetParametersc4ac8c6ff13630fec25b949ce93c9ed55cdfbc7bb7eae6c4f3236066d47e0dc5S3VersionKey960FDFCF": Object {
+      "Description": "S3 key for asset version \\"c4ac8c6ff13630fec25b949ce93c9ed55cdfbc7bb7eae6c4f3236066d47e0dc5\\"",
+      "Type": "String",
+    },
+  },
+  "Resources": Object {
+    "ApiGatewayEventBusRole78CD632E": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Policies": Array [
+          Object {
+            "PolicyDocument": Object {
+              "Statement": Array [
+                Object {
+                  "Action": "events:PutEvents",
+                  "Effect": "Allow",
+                  "Resource": Object {
+                    "Fn::GetAtt": Array [
+                      "TextEventBus50F77630",
+                      "Arn",
+                    ],
+                  },
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "putEvents",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaD247545B": Object {
+      "DependsOn": Array [
+        "LambdaServiceRoleA8ED4D3B",
+      ],
+      "Properties": Object {
+        "Code": Object {
+          "S3Bucket": Object {
+            "Ref": "AssetParametersc4ac8c6ff13630fec25b949ce93c9ed55cdfbc7bb7eae6c4f3236066d47e0dc5S3Bucket4255F1C3",
+          },
+          "S3Key": Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                Object {
+                  "Fn::Select": Array [
+                    0,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "AssetParametersc4ac8c6ff13630fec25b949ce93c9ed55cdfbc7bb7eae6c4f3236066d47e0dc5S3VersionKey960FDFCF",
+                        },
+                      ],
+                    },
+                  ],
+                },
+                Object {
+                  "Fn::Select": Array [
+                    1,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "AssetParametersc4ac8c6ff13630fec25b949ce93c9ed55cdfbc7bb7eae6c4f3236066d47e0dc5S3VersionKey960FDFCF",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            ],
+          },
+        },
+        "Handler": "oi.handler",
+        "Role": Object {
+          "Fn::GetAtt": Array [
+            "LambdaServiceRoleA8ED4D3B",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs14.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaProcessorRuleC28EF8EB": Object {
+      "Properties": Object {
+        "EventBusName": Object {
+          "Ref": "TextEventBus50F77630",
+        },
+        "EventPattern": Object {
+          "detail-type": Array [
+            "text",
+          ],
+          "source": Array [
+            "apigateway",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": Array [
+          Object {
+            "Arn": Object {
+              "Ref": "TextStateMachine95BF0DB2",
+            },
+            "Id": "Target0",
+            "RoleArn": Object {
+              "Fn::GetAtt": Array [
+                "TextStateMachineEventsRole7E52DA46",
+                "Arn",
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "LambdaServiceRoleA8ED4D3B": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": Array [
+          Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "arn:",
+                Object {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "TextApiGateway437DBC5F": Object {
+      "Properties": Object {
+        "Name": "TextApiGateway",
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "TextApiGatewayAccount54FA72E1": Object {
+      "DependsOn": Array [
+        "TextApiGateway437DBC5F",
+      ],
+      "Properties": Object {
+        "CloudWatchRoleArn": Object {
+          "Fn::GetAtt": Array [
+            "TextApiGatewayCloudWatchRoleE5030C8C",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+    },
+    "TextApiGatewayCloudWatchRoleE5030C8C": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": Array [
+          Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "arn:",
+                Object {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "TextApiGatewayDeployment754CD196c3c1adbc4ea08c0597ce4b42e4ae4328": Object {
+      "DependsOn": Array [
+        "TextApiGatewayPOST0201D577",
+      ],
+      "Properties": Object {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": Object {
+          "Ref": "TextApiGateway437DBC5F",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "TextApiGatewayDeploymentStagedev47E27826": Object {
+      "Properties": Object {
+        "DeploymentId": Object {
+          "Ref": "TextApiGatewayDeployment754CD196c3c1adbc4ea08c0597ce4b42e4ae4328",
+        },
+        "RestApiId": Object {
+          "Ref": "TextApiGateway437DBC5F",
+        },
+        "StageName": "dev",
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "TextApiGatewayPOST0201D577": Object {
+      "Properties": Object {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": Object {
+          "Credentials": Object {
+            "Fn::GetAtt": Array [
+              "ApiGatewayEventBusRole78CD632E",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": Array [
+            Object {
+              "ResponseTemplates": Object {
+                "application/json": "",
+              },
+              "StatusCode": "200",
+            },
+            Object {
+              "ResponseTemplates": Object {
+                "application/json": "{\\"state\\":\\"error\\",\\"message\\":\\"$util.escapeJavaScript($input.path('$.errorMessage'))\\"}",
+              },
+              "StatusCode": "400",
+            },
+          ],
+          "RequestParameters": Object {
+            "integration.request.header.Content-Type": "'application/x-amz-json-1.1'",
+            "integration.request.header.X-Amz-Target": "'AWSEvents.PutEvents'",
+          },
+          "RequestTemplates": Object {
+            "application/json": Object {
+              "Fn::Join": Array [
+                "",
+                Array [
+                  "{\\"Entries\\": [
+          {\\"Source\\": \\"apigateway\\", 
+          \\"Detail\\": \\"$util.escapeJavaScript($input.body)\\", 
+          \\"DetailType\\": \\"text\\", 
+          \\"EventBusName\\": \\"",
+                  Object {
+                    "Ref": "TextEventBus50F77630",
+                  },
+                  "\\"}]}",
+                ],
+              ],
+            },
+          },
+          "Type": "AWS",
+          "Uri": "arn:aws:apigateway:us-east-1:events:path//",
+        },
+        "MethodResponses": Array [
+          Object {
+            "StatusCode": "200",
+          },
+          Object {
+            "StatusCode": "400",
+          },
+        ],
+        "ResourceId": Object {
+          "Fn::GetAtt": Array [
+            "TextApiGateway437DBC5F",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": Object {
+          "Ref": "TextApiGateway437DBC5F",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "TextEventBus50F77630": Object {
+      "Properties": Object {
+        "Name": "TextEventBus",
+      },
+      "Type": "AWS::Events::EventBus",
+    },
+    "TextStateMachine95BF0DB2": Object {
+      "DependsOn": Array [
+        "TextStateMachineRoleDefaultPolicy7A727CB5",
+        "TextStateMachineRoleA1896FF6",
+      ],
+      "Properties": Object {
+        "DefinitionString": Object {
+          "Fn::Join": Array [
+            "",
+            Array [
+              "{\\"StartAt\\":\\"WaitUntil\\",\\"States\\":{\\"WaitUntil\\":{\\"Type\\":\\"Wait\\",\\"TimestampPath\\":\\"$.detail.at\\",\\"Next\\":\\"LambdaInvoke\\"},\\"LambdaInvoke\\":{\\"End\\":true,\\"Retry\\":[{\\"ErrorEquals\\":[\\"Lambda.ServiceException\\",\\"Lambda.AWSLambdaException\\",\\"Lambda.SdkClientException\\"],\\"IntervalSeconds\\":2,\\"MaxAttempts\\":6,\\"BackoffRate\\":2}],\\"Type\\":\\"Task\\",\\"OutputPath\\":\\"$.Payload\\",\\"Resource\\":\\"arn:",
+              Object {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke\\",\\"Parameters\\":{\\"FunctionName\\":\\"",
+              Object {
+                "Fn::GetAtt": Array [
+                  "LambdaD247545B",
+                  "Arn",
+                ],
+              },
+              "\\",\\"Payload.$\\":\\"$\\"}}}}",
+            ],
+          ],
+        },
+        "RoleArn": Object {
+          "Fn::GetAtt": Array [
+            "TextStateMachineRoleA1896FF6",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+    },
+    "TextStateMachineEventsRole7E52DA46": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "TextStateMachineEventsRoleDefaultPolicyC69D252C": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Ref": "TextStateMachine95BF0DB2",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "TextStateMachineEventsRoleDefaultPolicyC69D252C",
+        "Roles": Array [
+          Object {
+            "Ref": "TextStateMachineEventsRole7E52DA46",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "TextStateMachineRoleA1896FF6": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "states.",
+                      Object {
+                        "Ref": "AWS::Region",
+                      },
+                      ".amazonaws.com",
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "TextStateMachineRoleDefaultPolicy7A727CB5": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "LambdaD247545B",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "TextStateMachineRoleDefaultPolicy7A727CB5",
+        "Roles": Array [
+          Object {
+            "Ref": "TextStateMachineRoleA1896FF6",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+  },
+}
+`;
