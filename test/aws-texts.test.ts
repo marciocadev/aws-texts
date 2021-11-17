@@ -39,7 +39,7 @@ describe('Stack tests', () => {
     });
 
     test('Event Rule Created', () => {
-        const lambdaLogicalId = stack.resolve((stack.lambda.node.defaultChild as CfnFunction).logicalId)
+        const lambdaLogicalId = stack.resolve((stack.dominantLanguage.node.defaultChild as CfnFunction).logicalId)
         console.log(lambdaLogicalId);
 
         const eventBusLogicalId = stack.resolve((stack.eventBus.node.defaultChild as CfnEventBus).logicalId);
