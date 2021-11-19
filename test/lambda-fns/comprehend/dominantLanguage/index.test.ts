@@ -1,9 +1,18 @@
 import { EventBridgeEvent } from 'aws-lambda';
 import { handler } from '../../../../lib/lambda-fns/comprehend/dominantLanguage';
-import { mockClient } from 'aws-sdk-client-mock';
-import { ComprehendClient, DetectDominantLanguageCommand } from '@aws-sdk/client-comprehend';
+import { DetectDominantLanguageCommand } from '@aws-sdk/client-comprehend';
 
-const clientMock = mockClient(ComprehendClient);
+jest.mock('@aws-sdk/client-comprehend', () => {  
+    class MockComprehendClient {
+        send() {
+            return {Languages: { LanguageCode: 'en', Score: 1 } }
+        }
+    }
+    return {
+        ComprehendClient: MockComprehendClient,
+        DetectDominantLanguageCommand: jest.fn().mockImplementation(() => { return {} })
+    }
+})
 
 describe('Detect language success', () => {
 
@@ -15,12 +24,9 @@ describe('Detect language success', () => {
             }
         } as any;
         const context = {} as any;
-
-        clientMock.on(DetectDominantLanguageCommand).resolves({
-            Languages: { LanguageCode: 'en', Score: 1 }
-        } as any);
         const result = await handler(event, context);
-    
+
+        expect(DetectDominantLanguageCommand).toBeCalledTimes(1);
         expect(result).toMatchObject({
             message: 'Hello World!!!',
             language: { LanguageCode: 'en', Score: 1 } 

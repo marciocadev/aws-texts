@@ -12,9 +12,8 @@ export const handler =
 
     try {
         const params:DetectDominantLanguageCommandInput = {Text: message}
-        const data:DetectDominantLanguageCommandOutput = await client.send(
-            new DetectDominantLanguageCommand(params)
-        );
+        const command = new DetectDominantLanguageCommand(params);
+        const data:DetectDominantLanguageCommandOutput = await client.send(command);
 
         result = {
             message: message,

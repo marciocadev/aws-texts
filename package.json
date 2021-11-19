@@ -20,11 +20,11 @@
   "devDependencies": {
     "@aws-cdk/assertions": "^1.132.0",
     "@aws-sdk/client-comprehend": "^3.41.0",
+    "@aws-sdk/client-s3": "^3.41.0",
     "@types/aws-lambda": "^8.10.85",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "aws-cdk": "1.132.0",
-    "aws-sdk-client-mock": "^0.5.6",
     "jest": "^26.4.2",
     "ts-jest": "^26.2.0",
     "ts-node": "^9.0.0",
