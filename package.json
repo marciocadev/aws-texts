@@ -10,14 +10,21 @@
     "test": "jest",
     "coverage": "npm run test -- --coverage",
     "test-update": "npm run test -- -u",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "sam-build": "npm run build && sam-beta-cdk build",
+    "deploy": "cdk deploy -a .aws-sam/build --profile marcio-dev --all --require-approval never",
+    "destroy": "cdk destroy -a .aws-sam/build --profile marcio-dev -f",
+    "local-dominantLanguage": "sam-beta-cdk local invoke --profile marcio-dev AwsTextsStack/DominantLanguage -e events/txt.json",
+    "debug": "sam-beta-cdk local invoke --profile marcio-dev AwsTextsStack/DominantLanguage -d 9999 -e events/txt.json"
   },
   "devDependencies": {
     "@aws-cdk/assertions": "^1.132.0",
+    "@aws-sdk/client-comprehend": "^3.41.0",
     "@types/aws-lambda": "^8.10.85",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "aws-cdk": "1.132.0",
+    "aws-sdk-client-mock": "^0.5.6",
     "jest": "^26.4.2",
     "ts-jest": "^26.2.0",
     "ts-node": "^9.0.0",

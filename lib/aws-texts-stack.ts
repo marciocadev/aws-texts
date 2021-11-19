@@ -1,30 +1,45 @@
 import * as cdk from '@aws-cdk/core';
-import { PolicyDocument, PolicyStatement, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
+import { Effect, PolicyDocument, PolicyStatement, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { RestApi, Integration, IntegrationType, IntegrationOptions } from '@aws-cdk/aws-apigateway';
 import { EventBus, IEventBus, Rule } from '@aws-cdk/aws-events';
-import { Function, Runtime, Code, IFunction } from '@aws-cdk/aws-lambda';
-import { LambdaFunction, SfnStateMachine } from '@aws-cdk/aws-events-targets';
+import { Function, Runtime, Code, IFunction, LayerVersion } from '@aws-cdk/aws-lambda';
+import { SfnStateMachine } from '@aws-cdk/aws-events-targets';
 import { StateMachine, Wait, WaitTime } from '@aws-cdk/aws-stepfunctions';
 import { LambdaInvoke } from '@aws-cdk/aws-stepfunctions-tasks';
 
 export class AwsTextsStack extends cdk.Stack {
-  lambda: IFunction;
+  dominantLanguage: IFunction;
   eventBus: IEventBus;
 
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    this.lambda = new Function(this, 'Lambda', {
-      runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset('lib/lambda-fns'),
-      handler: 'oi.handler'
+    const awsSDKV3Layer = new LayerVersion(this, 'AWSSDKV3', {
+      code: Code.fromAsset('lib/layer'),
+      compatibleRuntimes: [Runtime.NODEJS_14_X]
     });
+
+    const comprehendPolicy = new PolicyStatement({
+      effect: Effect.ALLOW,
+      resources: ['*'],
+      actions: [
+        'comprehend:DetectDominantLanguage'
+      ]
+    });
+
+    this.dominantLanguage = new Function(this, 'DominantLanguage', {
+      runtime: Runtime.NODEJS_14_X,
+      code: Code.fromAsset('lib/lambda-fns/comprehend/dominantLanguage'),
+      handler: 'index.handler',
+      layers: [awsSDKV3Layer]
+    });
+    this.dominantLanguage.addToRolePolicy(comprehendPolicy);
 
     const waitTask = new Wait(this, 'WaitUntil', {
       time: WaitTime.duration(cdk.Duration.seconds(10))//.timestampPath('$.detail.at')
     });
     const lambdaTask = new LambdaInvoke(this, 'LambdaInvoke', {
-      lambdaFunction: this.lambda,
+      lambdaFunction: this.dominantLanguage,
       outputPath: '$.Payload'
     });
 
@@ -39,7 +54,6 @@ export class AwsTextsStack extends cdk.Stack {
       eventBus: this.eventBus,
       eventPattern: {source:['apigateway'], detailType:['text']},
       targets: [
-      //  new LambdaFunction(this.lambda)
         new SfnStateMachine(stateMachine)
       ]
     });
@@ -89,12 +103,5 @@ export class AwsTextsStack extends cdk.Stack {
         methodResponses: [{statusCode: "200"}, {statusCode: "400"}]
       }
     );
-
-    // The code that defines your stack goes here
-
-    // example resource
-    // const queue = new sqs.Queue(this, 'AwsTextsQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
   }
 }
